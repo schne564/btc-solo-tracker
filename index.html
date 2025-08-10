@@ -1,54 +1,67 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BTC Solo Mining Tracker</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #121212; color: white; text-align: center; }
+    h1 { margin-top: 20px; }
+    input, button { padding: 8px; margin: 5px; }
+    .stat { margin: 10px 0; }
+  </style>
 </head>
-<body class="dark">
-  <div class="container">
-    <header>
-      <h1>BTC Solo Mining Tracker</h1>
-      <div id="addr-display" class="sub">Tracking: <span id="tracking-addr">bc1qd6mfkav3yzztuhpq6qg0kfm5fc2ay7jvy52rdn</span></div>
-    </header>
-
-    <main>
-      <div class="controls">
-        <input id="addr-input" placeholder="Enter BTC address (or leave sample)" />
-        <button id="track-btn">Track</button>
-      </div>
-
-      <div id="alerts"></div>
-
-      <div class="cards">
-        <div class="card">
-          <div class="card-title">Best Share</div>
-          <div id="bestshare" class="card-value">—</div>
-        </div>
-        <div class="card">
-          <div class="card-title">Network Difficulty</div>
-          <div id="diff" class="card-value">—</div>
-        </div>
-        <div class="card">
-          <div class="card-title">Chance %</div>
-          <div id="chance" class="card-value">—</div>
-        </div>
-        <div class="card">
-          <div class="card-title">Last Block Found</div>
-          <div id="lastblock" class="card-value">—</div>
-        </div>
-      </div>
-
-      <h2>Workers</h2>
-      <div id="workers"></div>
-
-      <footer>
-        <small>Auto-refresh every 60s | Powered by CKPool & Cloudflare Workers</small>
-      </footer>
-    </main>
+<body>
+  <h1>BTC Solo Mining Tracker</h1>
+  <div>
+    <label for="address">Enter BTC address (or leave sample)</label><br>
+    <input type="text" id="address" value="bc1qd6mfkav3yzztuhpq6qg0kfm5fc2ay7jvy52rdn" size="50"/>
+    <button onclick="track()">Track</button>
   </div>
 
-  <script src="app.js"></script>
+  <div id="trackingInfo" class="stat"></div>
+  <div class="stat">Best Share: <span id="bestShare">—</span></div>
+  <div class="stat">Network Difficulty: <span id="networkDiff">—</span></div>
+  <div class="stat">Chance %: <span id="chance">—</span></div>
+  <div class="stat">Last Block Found: <span id="lastBlock">—</span></div>
+  <div class="stat">Workers: <span id="workers">—</span></div>
+  <div style="margin-top: 20px; font-size: small;">Auto-refresh every 60s | Powered by CKPool & Cloudflare Workers</div>
+
+  <script>
+    async function track() {
+      const address = document.getElementById("address").value.trim();
+      document.getElementById("trackingInfo").innerText = `Tracking: ${address}`;
+
+      try {
+        // Fetch data from Cloudflare Worker instead of CKPool directly
+        const res = await fetch(`https://broad-cell-151e.schne564.workers.dev/?address=${address}`);
+        if (!res.ok) throw new Error("Network error");
+        const data = await res.json();
+
+        if (data && data.bestshare) {
+          document.getElementById("bestShare").innerText = data.bestshare;
+          document.getElementById("workers").innerText = data.workers ?? "—";
+
+          // Optional: Add real difficulty, chance, last block if Worker returns them
+          document.getElementById("networkDiff").innerText = data.difficulty ?? "—";
+          document.getElementById("chance").innerText = data.chance ?? "—";
+          document.getElementById("lastBlock").innerText = data.lastblock ?? "—";
+        } else {
+          throw new Error("Invalid data");
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("bestShare").innerText = "Error fetching data";
+        document.getElementById("networkDiff").innerText = "Error fetching data";
+        document.getElementById("chance").innerText = "Error fetching data";
+        document.getElementById("lastBlock").innerText = "Error fetching data";
+        document.getElementById("workers").innerText = "Error fetching data";
+      }
+    }
+
+    // Auto-refresh every 60 seconds
+    setInterval(track, 60000);
+    track();
+  </script>
 </body>
 </html>
