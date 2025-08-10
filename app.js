@@ -1,6 +1,6 @@
 // Replace WORKER_URL with your Cloudflare Worker URL after deployment, e.g.
 // const WORKER_URL = 'https://your-worker.example.workers.dev';
-const WORKER_URL = 'WORKER_URL_PLACEHOLDER';
+const WORKER_URL = 'https://broad-cell-151e.schne564.workers.dev/';
 const defaultAddr = "1LuckyR1fFHEsXYyx5QK4UFzv3PEAepPMK";
 let addr = defaultAddr;
 const refreshInterval = 60000; // 60s
