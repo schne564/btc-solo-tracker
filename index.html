@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BTC Solo Mining Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+  <div class="container">
+    <header>
+      <h1>BTC Solo Mining Tracker</h1>
+      <div id="addr-display" class="sub">Tracking: <span id="tracking-addr">1LuckyR1fFHEsXYyx5QK4UFzv3PEAepPMK</span></div>
+    </header>
+
+    <main>
+      <div class="controls">
+        <input id="addr-input" placeholder="Enter BTC address (or leave sample)" />
+        <button id="track-btn">Track</button>
+      </div>
+
+      <div id="alerts"></div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">Best Share</div>
+          <div id="bestshare" class="card-value">—</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Network Difficulty</div>
+          <div id="diff" class="card-value">—</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Chance %</div>
+          <div id="chance" class="card-value">—</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Last Block Found</div>
+          <div id="lastblock" class="card-value">—</div>
+        </div>
+      </div>
+
+      <h2>Workers</h2>
+      <div id="workers"></div>
+
+      <footer>
+        <small>Auto-refresh every 60s | Powered by CKPool & Cloudflare Workers</small>
+      </footer>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
