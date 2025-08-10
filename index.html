@@ -1,67 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>BTC Solo Mining Tracker</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #121212; color: white; text-align: center; }
-    h1 { margin-top: 20px; }
-    input, button { padding: 8px; margin: 5px; }
-    .stat { margin: 10px 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    input {
+      width: 300px;
+    }
+    button {
+      background: #ff9800;
+      color: white;
+      cursor: pointer;
+    }
+    .stats {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .stat-item {
+      margin: 8px 0;
+    }
   </style>
 </head>
 <body>
+
   <h1>BTC Solo Mining Tracker</h1>
-  <div>
-    <label for="address">Enter BTC address (or leave sample)</label><br>
-    <input type="text" id="address" value="bc1qd6mfkav3yzztuhpq6qg0kfm5fc2ay7jvy52rdn" size="50"/>
-    <button onclick="track()">Track</button>
+  <p>Enter BTC address (or leave sample)</p>
+  <input type="text" id="address" value="bc1qd6mfkav3yzztuhpq6qg0kfm5fc2ay7jvy52rdn">
+  <button id="trackBtn">Track</button>
+
+  <div class="stats">
+    <div class="stat-item">Tracking: <span id="trackingAddr">—</span></div>
+    <div class="stat-item">Best Share: <span id="bestShare">—</span></div>
+    <div class="stat-item">Network Difficulty: <span id="difficulty">—</span></div>
+    <div class="stat-item">Chance %: <span id="chance">—</span></div>
+    <div class="stat-item">Last Block Found: <span id="lastBlock">—</span></div>
+    <div class="stat-item">Workers: <span id="workers">—</span></div>
   </div>
 
-  <div id="trackingInfo" class="stat"></div>
-  <div class="stat">Best Share: <span id="bestShare">—</span></div>
-  <div class="stat">Network Difficulty: <span id="networkDiff">—</span></div>
-  <div class="stat">Chance %: <span id="chance">—</span></div>
-  <div class="stat">Last Block Found: <span id="lastBlock">—</span></div>
-  <div class="stat">Workers: <span id="workers">—</span></div>
-  <div style="margin-top: 20px; font-size: small;">Auto-refresh every 60s | Powered by CKPool & Cloudflare Workers</div>
+  <p style="margin-top: 20px; font-size: 12px; color: #888;">
+    Auto-refresh every 60s | Powered by CKPool & Cloudflare Workers
+  </p>
 
   <script>
-    async function track() {
-      const address = document.getElementById("address").value.trim();
-      document.getElementById("trackingInfo").innerText = `Tracking: ${address}`;
+    const addressInput = document.getElementById("address");
+    const trackBtn = document.getElementById("trackBtn");
+    const trackingAddrEl = document.getElementById("trackingAddr");
+    const bestShareEl = document.getElementById("bestShare");
+    const difficultyEl = document.getElementById("difficulty");
+    const chanceEl = document.getElementById("chance");
+    const lastBlockEl = document.getElementById("lastBlock");
+    const workersEl = document.getElementById("workers");
 
+    const WORKER_URL = "https://broad-cell-151e.schne564.workers.dev/";
+
+    async function fetchStats(address) {
       try {
-        // Fetch data from Cloudflare Worker instead of CKPool directly
-        const res = await fetch(`https://broad-cell-151e.schne564.workers.dev/?address=${address}`);
-        if (!res.ok) throw new Error("Network error");
+        const res = await fetch(`${WORKER_URL}?address=${address}`);
+        if (!res.ok) throw new Error("Failed to fetch stats");
         const data = await res.json();
 
-        if (data && data.bestshare) {
-          document.getElementById("bestShare").innerText = data.bestshare;
-          document.getElementById("workers").innerText = data.workers ?? "—";
+        trackingAddrEl.textContent = address;
+        bestShareEl.textContent = data.bestshare ? Number(data.bestshare).toLocaleString() : "—";
+        difficultyEl.textContent = data.difficulty ? Number(data.difficulty).toLocaleString() : "—";
+        chanceEl.textContent = data.chance ? data.chance.toFixed(6) + "%" : "—";
+        lastBlockEl.textContent = data.lastBlock || "—";
+        workersEl.textContent = data.workers || "—";
 
-          // Optional: Add real difficulty, chance, last block if Worker returns them
-          document.getElementById("networkDiff").innerText = data.difficulty ?? "—";
-          document.getElementById("chance").innerText = data.chance ?? "—";
-          document.getElementById("lastBlock").innerText = data.lastblock ?? "—";
-        } else {
-          throw new Error("Invalid data");
-        }
       } catch (err) {
         console.error(err);
-        document.getElementById("bestShare").innerText = "Error fetching data";
-        document.getElementById("networkDiff").innerText = "Error fetching data";
-        document.getElementById("chance").innerText = "Error fetching data";
-        document.getElementById("lastBlock").innerText = "Error fetching data";
-        document.getElementById("workers").innerText = "Error fetching data";
       }
     }
 
-    // Auto-refresh every 60 seconds
-    setInterval(track, 60000);
-    track();
+    trackBtn.addEventListener("click", () => {
+      const addr = addressInput.value.trim();
+      if (addr) fetchStats(addr);
+    });
+
+    // Auto-refresh every 60s
+    setInterval(() => {
+      const addr = addressInput.value.trim();
+      if (addr) fetchStats(addr);
+    }, 60000);
+
+    // Initial load
+    fetchStats(addressInput.value.trim());
   </script>
+
 </body>
 </html>
